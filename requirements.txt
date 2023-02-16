@@ -1,6 +1,6 @@
-sklearn
 surprise
 tmdbv3api
+scikit-learn
 ydata_profiling
 numpy==1.19.2
 scipy==1.7.3
