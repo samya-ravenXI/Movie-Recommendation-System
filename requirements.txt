@@ -1,4 +1,5 @@
 sklearn
+surprise
 tmdbv3api
 ydata_profiling
 numpy==1.19.2
@@ -8,6 +9,5 @@ plotly==5.13.0
 joblib==1.1.0
 igraph==0.10.4
 networkx==2.6.3
-surprise==1.1.1
 streamlit==1.18.1
 streamlit_pandas_profiling==0.1.3
