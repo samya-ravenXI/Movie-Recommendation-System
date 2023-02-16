@@ -115,7 +115,11 @@ with tab2:
 
     except:
         tempdb = load_scraped_data('./data/contents.csv')
-    count = joblib.load('./systems/count.pkl')
+
+    @st.cache_data
+    def load_count():
+        return joblib.load('./systems/count.pkl')
+    count = load_count()
 
     # The following dataset is required for collaborative recommendations
     temp = tempdb
@@ -155,6 +159,9 @@ with tab2:
         result = re.sub("[^a-zA-Z0-9 ]", "", title + ' ' + overview + ' ' +  casts + ' ' +  genres + ' ' +  keywords)
         return mov.title, result
 
+    def load_count_matrix():
+        return sparse.load_npz('./systems/count_matrix.npz')
+
     def contextBasedRecommendations(title, num):
 
         # Fetches top 10 results based on similarity (not more as it may lose relevance) but returns 5 random ones
@@ -170,7 +177,7 @@ with tab2:
             return 'Avatar (2009)', popularMeasureTMDB(desc_movies, num)
 
         query_vec = count.transform([desc]) 
-        count_matrix = sparse.load_npz('./systems/count_matrix.npz')                  # Transforming the modified title into a query vec using the fitted count vectorizer
+        count_matrix = load_count_matrix()                                            # Transforming the modified title into a query vec using the fitted count vectorizer
         similarity = cosine_similarity(query_vec, count_matrix).flatten()             # Computing cosine similarity measure
         inx = np.argsort(similarity)[::-1][0:num]                                     # Getting the most relevant recommendations
         res = tempdb.iloc[inx][['movieId', 'title', 'overview', 'casts']]
@@ -199,7 +206,11 @@ with tab2:
             mostUsers = mostUsers.sort_values('count')
             userList = list(mostUsers['userId'])
         
-        _, svd = dump.load('./systems/svd.pkl')
+        @st.cache_data
+        def load_svd():
+            return dump.load('./systems/svd.pkl')
+
+        _, svd = load_svd()
 
         movieIdx = np.unique(tempdb.movieId)
     
