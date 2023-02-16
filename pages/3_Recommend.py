@@ -245,7 +245,7 @@ with tab2:
     st.error("Caution: Click on 'Generate Recommendations' once the details have been entered")
     form = st.form(key = 'rec')
     name = form.text_input('Enter Your Movie Title:', 'The Dark Knight')
-    API_KEY = form.text_input('Enter Your TMDb API Key:')
+    # API_KEY = form.text_input('Enter Your TMDb API Key:')
     generate = form.form_submit_button('Generate Recommendations:')
 
     if generate:
