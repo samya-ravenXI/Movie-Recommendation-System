@@ -1,2 +1,4 @@
 ratings.csv filter=lfs diff=lfs merge=lfs -text
 data/ratings.csv filter=lfs diff=lfs merge=lfs -text
+systems/count.pkl filter=lfs diff=lfs merge=lfs -text
+systems/svd.pkl filter=lfs diff=lfs merge=lfs -text
