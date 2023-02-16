@@ -1,11 +1,11 @@
+numpy
+pandas
+plotly
 surprise
 tmdbv3api
 scikit-learn
 ydata_profiling
-numpy==1.19.2
 scipy==1.7.3
-pandas==1.3.5
-plotly==5.13.0
 joblib==1.1.0
 igraph==0.10.4
 networkx==2.6.3
