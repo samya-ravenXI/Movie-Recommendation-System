@@ -1,0 +1,13 @@
+scipy
+numpy
+pandas
+plotly
+joblib
+igraph
+surprise
+networkx
+streamlit
+tmdbv3api
+scikit-learn
+ydata_profiling
+streamlit_pandas_profiling
