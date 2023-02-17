@@ -36,21 +36,25 @@ st.sidebar.markdown(
     '''.format(img_to_bytes('./icons/cover.jpg')),
     unsafe_allow_html=True)
 
-st.title("Movie Recommendation System")
-for i in range(2):
-    st.markdown('#')
-st.caption('This projects uses MovieLens 25M Dataset along with TMDb API to explore and visualize trends in movies. It also contains a content based & collaborative based recommendation model using Vectorizer and SVD respectively.')
-st.caption('Tip: To use the content based/collaborative based recommendation system, a TMDb API Key is required.')
+with st.container():
+    st.title("Movie Recommendation System")
+    for i in range(2):
+        st.markdown('#')
+    st.caption('This projects uses MovieLens 25M Dataset along with TMDb API to explore and visualize trends in movies.')
+    st.caption('It also contains a content based & collaborative based recommendation model using Vectorizer and SVD respectively.')
+    st.caption('Tip: To use the content based/collaborative based recommendation system, a TMDb API Key is required.')
 
-for i in range(2):
-    st.markdown('#')
-st.markdown('#####')
-st.markdown('---')
+    for i in range(2):
+        st.markdown('#')
+    st.markdown('#####')
+    st.markdown('---')
 
-col1, col2, col3 = st.columns(3, gap='large')
-with col1:
-    st.markdown("<a src='https://docs.streamlit.io/library/get-started'><img src='data:image/png;base64,{}' class='img-fluid' width=70%></a>".format(img_to_bytes('./icons/streamlit.png')), unsafe_allow_html=True)
-with col2:
-    st.markdown("<a src='https://developers.themoviedb.org/3/getting-started/introduction'><img src='data:image/png;base64,{}' class='img-fluid' width=45%></a>".format(img_to_bytes('./icons/tmdb.png')), unsafe_allow_html=True)
-with col3:
-    st.markdown("<a src='https://colab.research.google.com/drive/1J6hg-FvonxtgzQ71MNr11md5gFtiqmZV?usp=share_link'><img src='data:image/png;base64,{}' class='img-fluid' width=45%></a>".format(img_to_bytes('./icons/colab.png')), unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3, gap='large')
+    with col1:
+        st.empty()
+        st.empty()
+        st.markdown("<a href='https://docs.streamlit.io/library/get-started'><img src='data:image/png;base64,{}' class='img-fluid' width=100%/></a>".format(img_to_bytes('./icons/streamlit.png')), unsafe_allow_html=True)
+    with col2:
+        st.markdown("<a href='https://developers.themoviedb.org/3/getting-started/introduction'><img src='data:image/png;base64,{}' class='img-fluid' width=60%/></a>".format(img_to_bytes('./icons/tmdb.png')), unsafe_allow_html=True)
+    with col3:
+        st.markdown("<a href='https://colab.research.google.com/drive/1J6hg-FvonxtgzQ71MNr11md5gFtiqmZV?usp=share_link'><img src='data:image/png;base64,{}' class='img-fluid' width=50%/></a>".format(img_to_bytes('./icons/colab.png')), unsafe_allow_html=True)

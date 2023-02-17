@@ -4,6 +4,7 @@ import joblib
 import random
 import numpy as np
 import pandas as pd
+import configparser
 import streamlit as st
 from scipy import sparse
 from surprise import dump
@@ -258,6 +259,10 @@ with tab2:
     name = form.text_input('Enter Your Movie Title:', 'The Dark Knight')
     # API_KEY = form.text_input('Enter Your TMDb API Key:')
     generate = form.form_submit_button('Generate Recommendations:')
+
+    config = configparser.ConfigParser()
+    config.read('env.config')
+    API_KEY = config['APIKey']['API_KEY']
 
     if generate:
         title, desc = contextBasedRecommendations(name, 5)

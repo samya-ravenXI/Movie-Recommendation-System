@@ -83,76 +83,14 @@ with tab2:
 
         # Genre seggregation of movies
 
-        db = ratings.sort_values(['userId', 'movieId']).groupby('userId')
-        count = 0
-        genres = {}
-        for i in movies.values:
-            for j in i[2].split('|'):
-                if j not in genres:
-                    genres[j] = count
-                    count += 1
-        data = []
-        gen = list(genres.keys())
-        for i in movies.values:
-            d = [i[0]] + [i[1]] + [0] * len(gen)
-            for j in i[2].split('|'):
-                d[genres[j] + 2] = 1
-            data.append(d)
-        labels = ['movieId', 'title'] + gen
-        db = pd.DataFrame(columns=labels, data=data)
-        dist = [0] * len(gen)
-        for i in gen:
-            dist[genres[i]] = db[db[i] == 1].size
-        db = pd.DataFrame({'genre': gen, 'value': dist})
+        genLabel = list(genres.iloc[:, 2:].columns)
+        genCount = []
+        for i in range(len(genLabel)):
+            genCount.append(np.sum(genres.iloc[:, i+2]))
+        db = pd.DataFrame({'genre': genLabel, 'value': genCount})
         fig = px.bar(db, x='genre', y='value', color='value', title='Genre Seggregation of Movies', color_continuous_scale=px.colors.sequential.RdBu)
         return fig
 
-    @st.cache_data
-    def highRatedGen():
-
-        # Highest rated genres
-
-        db = ratings.iloc[:, 1:3].sort_values('rating', ascending=False)
-        db = db[db['rating'] == 5].copy()
-        db.drop_duplicates(keep='first', inplace=True)
-        db = db.sort_values('movieId')
-        highRatedMovies = pd.merge(db['movieId'], movies, on='movieId', how='inner')
-        highRatedMovies.drop_duplicates(keep='first', inplace=True)
-        highRatedMovies = highRatedMovies.sort_values('movieId')
-        highRatedMovies = highRatedMovies.head(100)
-        highRatedGenres = {}
-        for i in highRatedMovies.values:
-            for j in i[2].split('|'):
-                if j not in highRatedGenres:
-                    highRatedGenres[j] = 1
-                else:
-                    highRatedGenres[j] += 1
-        highRatedGenres = {k: v for k, v in sorted(highRatedGenres.items(), key=lambda item: item[1])}
-        db = pd.DataFrame({'genres': highRatedGenres.keys(), 'no. of ratings': highRatedGenres.values()})
-        fig = px.bar(db, x='genres', y='no. of ratings', color='no. of ratings', title='Highest Rated Genres', color_continuous_scale=px.colors.sequential.Magenta)
-        return fig
-
-    col1, col2 = st.columns(2, gap="small")
-    with col1:
-        st.plotly_chart(genSeg(), use_container_width=True)
-    with col2:
-        st.plotly_chart(highRatedGen(), use_container_width=True)
-
-with tab3:
-
-    # Static plots are cached to save time
-
-    @st.cache_data
-    def avgVoteDist():
-        
-        # Average vote distribution
-
-        db = pd.merge(desc_movies, desc2_movies, on='movieId', how='inner')
-        db = db.loc[:, db.columns.intersection(['movieId', 'title', 'vote_average'])]
-        voteDist = db.groupby('vote_average')['vote_average'].count().reset_index(name='vote_dist').sort_values('vote_dist', ascending=False)
-        fig = px.scatter(voteDist, x='vote_average', y='vote_dist', size='vote_dist', color='vote_dist', title='Average Vote Distribution', color_continuous_scale=px.colors.sequential.Burg, marginal_x='histogram', marginal_y='rug')
-        return fig
-    
     @st.cache_data
     def keySeg():
 
@@ -176,9 +114,37 @@ with tab3:
 
     col1, col2 = st.columns(2, gap="small")
     with col1:
-        st.plotly_chart(avgVoteDist(), use_container_width=True)
+        st.plotly_chart(genSeg(), use_container_width=True)
     with col2:
         st.plotly_chart(keySeg(), use_container_width=True)
+
+with tab3:
+
+    # Static plots are cached to save time
+
+    @st.cache_data
+    def avgVoteDist():
+        
+        # Average vote distribution
+
+        db = pd.merge(desc_movies, desc2_movies, on='movieId', how='inner')
+        db = db.loc[:, db.columns.intersection(['movieId', 'title', 'vote_average'])]
+        voteDist = db.groupby('vote_average')['vote_average'].count().reset_index(name='vote_dist').sort_values('vote_dist', ascending=False)
+        fig = px.scatter(voteDist, x='vote_average', y='vote_dist', size='vote_dist', color='vote_dist', title='Average Vote Distribution', color_continuous_scale=px.colors.sequential.Burg, marginal_x='histogram', marginal_y='rug')
+        return fig
+    
+    @st.cache_data
+    def popCountDist():
+        db = pd.merge(desc_movies, desc2_movies, on='movieId', how='inner')
+        popCountDist = db.loc[:1000, db.columns.intersection(['movieId', 'title', 'popularity', 'vote_count'])]
+        fig = px.scatter(popCountDist, x='popularity', y='vote_count', size='vote_count', color='vote_count', title='Cross Appearance of Popularity and Vote Count', color_continuous_scale=px.colors.sequential.Darkmint, marginal_x='rug', marginal_y='rug')
+        return fig
+
+    col1, col2 = st.columns(2, gap="small")
+    with col1:
+        st.plotly_chart(avgVoteDist(), use_container_width=True)
+    with col2:
+        st.plotly_chart(popCountDist(), use_container_width=True)
 
 with tab4:
 
