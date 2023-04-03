@@ -158,7 +158,7 @@ with tab2:
         casts = ' '.join(i.name.replace(' ', '').lower() for i in mov.casts.cast[:5])
         keywords = ' '.join(i.name.replace(' ', '').lower() for i in mov.keywords.keywords)
         result = re.sub("[^a-zA-Z0-9 ]", "", title + ' ' + overview + ' ' +  casts + ' ' +  genres + ' ' +  keywords)
-        return mov.title, result
+        return mov.title, result, genres
 
     def load_count_matrix():
         return sparse.load_npz('./systems/count_matrix.npz')
@@ -169,9 +169,9 @@ with tab2:
 
         try:
             try:
-                title, desc = descTitle(title)
+                title, desc, _ = descTitle(title)
             except:
-                title, desc = overTitle(title)
+                title, desc, _ = overTitle(title)
         except:
             # In case the API fails to retrieve results, displaying some popular movies
             # While returning the title of the most popular movie for collaborative recommendation
@@ -196,29 +196,42 @@ with tab2:
 
     def collaborativeBasedRecommendations(title, num):
 
-        # Randomly selects users who have rated the provided title and then finds their highest rated movies before randomly showing it
-
+       # Randomly selects users who have rated the provided title and then finds their highest rated movies before randomly showing it
+        title, desc, gList = descTitle(title)
+        gList = [item.capitalize() for item in gList.split(' ')]
+        cond = ''
+        x = tempdb
+        for i in range(len(gList)):
+            cond += ' (genres[gList[' + str(i) + ']] == 1) |'
+            try:
+                x = pd.merge(genres[eval(cond[:-2])], tempdb, on='movieId', how='inner')
+                x = pd.merge(x, ratings, on='movieId', how='inner').sort_values('rating', ascending=False)
+            except:
+                x = tempdb
         try:
             id = float(list(t[t['title'] == ''].sort_values('movieId')['movieId'])[0])
             id = int(links[links["tmdbId"] == id]['movieId'])
-            userList = list(ratings[ratings['movieId'] == id].sort_values('rating', ascending=False)['userId'])
+            userList = list(ratings[ratings['movieId'] == id].sort_values('rating', ascending=False)['userId'])[:100]
         except:
             mostUsers = ratings.iloc[:, :1].groupby('userId')['userId'].count().reset_index(name='count')
             mostUsers = mostUsers.sort_values('count')
-            userList = list(mostUsers['userId'])
+            userList = list(mostUsers['userId'])[:100]
         
+        movieIdx = list(np.unique(x.movieId))[:1000]
+
         @st.cache_data
         def load_svd():
             return dump.load('./systems/svd.pkl')
 
         _, svd = load_svd()
 
-        movieIdx = np.unique(tempdb.movieId)
-    
         predictions = []
         suggestions = []
-        for userId in (random.sample(userList, 10) if len(userList)>10 else userList):
-            for i in movieIdx:
+        uList = random.sample(userList, 10) if len(userList)>10 else userList
+        mList = np.unique(random.sample(movieIdx, 100))
+
+        for userId in uList:
+            for i in mList:
                 predictions.append(svd.predict(userId, i))
 
             # First map the predictions for the given user
@@ -257,7 +270,6 @@ with tab2:
     st.error("Caution: Click on 'Generate Recommendations' once the details have been entered")
     form = st.form(key = 'rec')
     name = form.text_input('Enter Your Movie Title:', 'The Dark Knight')
-    # API_KEY = form.text_input('Enter Your TMDb API Key:')
     generate = form.form_submit_button('Generate Recommendations:')
 
     config = configparser.ConfigParser()
@@ -270,5 +282,5 @@ with tab2:
 
         st.subheader('Users Also Liked')
     
-        desc = collaborativeBasedRecommendations(title, 5)
-        container(desc)
+        descCol = collaborativeBasedRecommendations(title, 5)
+        container(descCol)
