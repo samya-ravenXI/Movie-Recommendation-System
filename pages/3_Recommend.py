@@ -169,9 +169,9 @@ with tab2:
 
         try:
             try:
-                title, desc, _ = descTitle(title)
+                title, desc, gList = descTitle(title)
             except:
-                title, desc, _ = overTitle(title)
+                title, desc = overTitle(title)
         except:
             # In case the API fails to retrieve results, displaying some popular movies
             # While returning the title of the most popular movie for collaborative recommendation
@@ -192,22 +192,27 @@ with tab2:
             result['Poster'] = i[3]
             result['Cast'] = i[4]
             suggestions.append(result)
-        return title, suggestions
+        return title, suggestions, gList
 
-    def collaborativeBasedRecommendations(title, num):
+    def collaborativeBasedRecommendations(title, gList, num):
 
        # Randomly selects users who have rated the provided title and then finds their highest rated movies before randomly showing it
-        title, desc, gList = descTitle(title)
-        gList = [item.capitalize() for item in gList.split(' ')]
-        cond = ''
-        x = tempdb
-        for i in range(len(gList)):
-            cond += ' (genres[gList[' + str(i) + ']] == 1) |'
-            try:
-                x = pd.merge(genres[eval(cond[:-2])], tempdb, on='movieId', how='inner')
-                x = pd.merge(x, ratings, on='movieId', how='inner').sort_values('rating', ascending=False)
-            except:
-                x = tempdb
+
+       # Breaks down the genre list to find the movies containing those genres
+        if gList != None:
+            gList = [item.capitalize() for item in gList.split(' ')]
+            cond = ''
+            x = tempdb
+            for i in range(len(gList)):
+                cond += ' (genres[gList[' + str(i) + ']] == 1) |'
+                try:
+                    x = pd.merge(genres[eval(cond[:-2])], tempdb, on='movieId', how='inner')
+                    x = pd.merge(x, ratings, on='movieId', how='inner').sort_values('rating', ascending=False)
+                except:
+                    x = tempdb
+        else:
+            x = tempdb
+
         try:
             id = float(list(t[t['title'] == ''].sort_values('movieId')['movieId'])[0])
             id = int(links[links["tmdbId"] == id]['movieId'])
@@ -277,10 +282,10 @@ with tab2:
     API_KEY = config['APIKey']['API_KEY']
 
     if generate:
-        title, desc = contextBasedRecommendations(name, 5)
+        title, desc, gList = contextBasedRecommendations(name, 5)
         container(desc)
 
         st.subheader('Users Also Liked')
     
-        descCol = collaborativeBasedRecommendations(title, 5)
+        descCol = collaborativeBasedRecommendations(title, gList, 5)
         container(descCol)
