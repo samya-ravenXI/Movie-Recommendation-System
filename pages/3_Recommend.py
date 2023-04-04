@@ -172,10 +172,12 @@ with tab2:
                 title, desc, gList = descTitle(title)
             except:
                 title, desc = overTitle(title)
+                gList = None
         except:
             # In case the API fails to retrieve results, displaying some popular movies
             # While returning the title of the most popular movie for collaborative recommendation
-            return 'Avatar (2009)', popularMeasureTMDB(desc_movies, num)
+            st.error('API Response Down! Here\'s a few popular movies~')
+            return 'Avatar (2009)', popularMeasureTMDB(desc_movies, num), None
 
         query_vec = count.transform([desc]) 
         count_matrix = load_count_matrix()                                            # Transforming the modified title into a query vec using the fitted count vectorizer
